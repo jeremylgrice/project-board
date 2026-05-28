@@ -692,7 +692,7 @@ function openCoverPicker(anchor) {
       `}`;
 
     picker.querySelectorAll('[data-tab]').forEach(btn => {
-      btn.addEventListener('click', () => renderTab(btn.dataset.tab));
+      btn.addEventListener('click', e => { e.stopPropagation(); renderTab(btn.dataset.tab); });
     });
 
     picker.querySelectorAll('.cp-swatch').forEach(sw => {
