@@ -1029,7 +1029,21 @@ function morphBlock(wrap, newType) {
   bc.focus();
 }
 
-function snapAndSave() { S.blocks = collectBlocks(); renderBlocks(); queueSave(); }
+function snapAndSave() {
+  const focusedId = document.activeElement?.closest?.('.bw')?.dataset?.id;
+  S.blocks = collectBlocks();
+  renderBlocks();
+  if (focusedId) {
+    const bc = document.querySelector(`.bw[data-id="${focusedId}"] .bc`);
+    if (bc) {
+      bc.focus();
+      const r = document.createRange();
+      r.selectNodeContents(bc); r.collapse(false);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    }
+  }
+  queueSave();
+}
 
 function collectBlocks() {
   return Array.from(document.querySelectorAll('.bw')).map(w => ({
