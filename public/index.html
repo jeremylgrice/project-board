@@ -308,7 +308,7 @@
 
         <!-- Emoji -->
         <div id="page-emoji"
-          class="text-[52px] leading-none inline-block mb-3 cursor-pointer select-none
+          class="text-[52px] leading-none inline-block mb-3 cursor-pointer select-none relative z-[1]
                  transition-transform duration-200 hover:scale-110 hover:-rotate-3">📄</div>
 
         <!-- Title -->
@@ -367,7 +367,7 @@
 <!-- ── Cover picker ───────────────────────────────── -->
 <div id="cover-picker"
   class="fixed z-[500] bg-white dark:bg-[#2f2f2f] border border-[#e9e9e7] dark:border-white/[.1]
-         rounded-xl shadow-xl p-4 w-[308px]"></div>
+         rounded-xl shadow-xl p-4 w-[328px]"></div>
 
 <!-- ── Mobile overlay ────────────────────────────── -->
 <div id="overlay" class="hidden fixed inset-0 bg-black/25 z-[199]"></div>
@@ -594,6 +594,21 @@ const COVER_PRESETS = [
   'linear-gradient(135deg,#c79050 0%,#e8c07a 100%)',
 ];
 
+const IMAGE_PRESETS = [
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80',
+  'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=80',
+  'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1200&q=80',
+  'https://images.unsplash.com/photo-1490750967868-88df5691cc9e?w=1200&q=80',
+  'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&q=80',
+  'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200&q=80',
+  'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1200&q=80',
+  'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1200&q=80',
+];
+
+function isImageCover(cover) {
+  return cover && (cover.startsWith('http') || cover.startsWith('/') || cover.startsWith('data:'));
+}
+
 function renderCover(cover) {
   const coverEl  = el('page-cover');
   const bgEl     = el('cover-bg');
@@ -603,13 +618,26 @@ function renderCover(cover) {
 
   if (cover) {
     coverEl.classList.add('has-cover');
-    bgEl.style.background = cover;
+    bgEl.dataset.cover = cover;
+    if (isImageCover(cover)) {
+      bgEl.style.background = '';
+      bgEl.style.backgroundImage = `url(${cover})`;
+      bgEl.style.backgroundSize = 'cover';
+      bgEl.style.backgroundPosition = 'center';
+    } else {
+      bgEl.style.backgroundImage = '';
+      bgEl.style.backgroundSize = '';
+      bgEl.style.backgroundPosition = '';
+      bgEl.style.background = cover;
+    }
     barEl.classList.add('hidden');
     addBtn.classList.add('force-hide');
-    emojiEl.style.marginTop = '-36px';
+    emojiEl.style.marginTop = '-28px';
   } else {
     coverEl.classList.remove('has-cover');
     bgEl.style.background = '';
+    bgEl.style.backgroundImage = '';
+    bgEl.dataset.cover = '';
     barEl.classList.remove('hidden');
     addBtn.classList.remove('force-hide');
     emojiEl.style.marginTop = '';
@@ -618,27 +646,77 @@ function renderCover(cover) {
 
 function currentCover() {
   return el('page-cover').classList.contains('has-cover')
-    ? (el('cover-bg').style.background || null)
+    ? (el('cover-bg').dataset.cover || null)
     : null;
 }
 
 function openCoverPicker(anchor) {
   const picker = el('cover-picker');
   const rect   = anchor.getBoundingClientRect();
-  const cur    = currentCover();
-  picker.style.top  = Math.min(rect.bottom + 6, window.innerHeight - 220) + 'px';
-  picker.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 316)) + 'px';
-  picker.innerHTML = `
-    <div class="text-[11px] font-semibold tracking-wide uppercase text-[#9b9a97] mb-2.5">Cover</div>
-    <div class="grid grid-cols-5 gap-1.5">` +
-    COVER_PRESETS.map((p, i) =>
-      p === null
-        ? `<div class="cp-swatch cp-none${cur===null?' active':''}" data-i="${i}">✕</div>`
-        : `<div class="cp-swatch${p===cur?' active':''}" data-i="${i}" style="background:${p}"></div>`
-    ).join('') + `</div>`;
-  picker.querySelectorAll('.cp-swatch').forEach(sw => {
-    sw.addEventListener('click', () => { renderCover(COVER_PRESETS[+sw.dataset.i]); queueSave(); closeCoverPicker(); });
-  });
+  picker.style.top  = Math.min(rect.bottom + 6, window.innerHeight - 320) + 'px';
+  picker.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 336)) + 'px';
+
+  function renderTab(tab) {
+    const cur = currentCover();
+    const isGrad = tab === 'gradient';
+    const tabCls = (active) => active
+      ? 'text-[12px] font-semibold text-[#37352f] dark:text-white/80 border-b-2 border-[#37352f] dark:border-white/60 pb-1.5 cursor-pointer bg-transparent border-l-0 border-r-0 border-t-0'
+      : 'text-[12px] font-semibold text-[#9b9a97] pb-1.5 cursor-pointer bg-transparent border-none';
+
+    picker.innerHTML = `
+      <div class="flex gap-4 mb-3 border-b border-[#e9e9e7] dark:border-white/[.08]">
+        <button class="${tabCls(isGrad)}" data-tab="gradient">Gradient</button>
+        <button class="${tabCls(!isGrad)}" data-tab="image">Image</button>
+      </div>
+      ${isGrad ? `
+        <div class="grid grid-cols-5 gap-1.5">` +
+          COVER_PRESETS.map(p =>
+            p === null
+              ? `<div class="cp-swatch cp-none${cur===null?' active':''}" data-v="">✕</div>`
+              : `<div class="cp-swatch${p===cur?' active':''}" data-v="${p}" style="background:${p}"></div>`
+          ).join('') + `</div>
+      ` : `
+        <div class="grid grid-cols-4 gap-1.5 mb-3">` +
+          IMAGE_PRESETS.map(url =>
+            `<div class="cp-swatch h-12 bg-cover bg-center${url===cur?' active':''}" data-v="${url}"
+                  style="background-image:url(${url})"></div>`
+          ).join('') + `</div>
+        <div class="flex gap-1.5">
+          <input id="cp-url-input" type="url" placeholder="Paste any image URL…"
+            class="flex-1 px-2.5 py-1.5 text-[12.5px] border border-[#e9e9e7] dark:border-white/[.1]
+                   rounded-lg bg-white dark:bg-[#191919] text-[#37352f] dark:text-white/80
+                   outline-none focus:border-[#2383e2]" />
+          <button id="cp-url-go"
+            class="px-3 py-1.5 bg-[#2383e2] hover:bg-[#1a6fc4] text-white text-[12px] rounded-lg border-none cursor-pointer transition-colors">Apply</button>
+        </div>
+      `}`;
+
+    picker.querySelectorAll('[data-tab]').forEach(btn => {
+      btn.addEventListener('click', () => renderTab(btn.dataset.tab));
+    });
+
+    picker.querySelectorAll('.cp-swatch').forEach(sw => {
+      sw.addEventListener('click', () => {
+        renderCover(sw.dataset.v || null);
+        queueSave();
+        closeCoverPicker();
+      });
+    });
+
+    if (!isGrad) {
+      const urlInput = picker.querySelector('#cp-url-input');
+      const goBtn    = picker.querySelector('#cp-url-go');
+      const apply = () => {
+        const url = urlInput.value.trim();
+        if (url) { renderCover(url); queueSave(); closeCoverPicker(); }
+      };
+      goBtn?.addEventListener('click', apply);
+      urlInput?.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); });
+    }
+  }
+
+  const cur = currentCover();
+  renderTab(isImageCover(cur) ? 'image' : 'gradient');
   picker.classList.add('open');
 }
 
