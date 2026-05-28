@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign in — Our Space</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #F8F5F0;
+      --panel:      #FFFFFF;
+      --text:       #2B2118;
+      --muted:      #8C8178;
+      --faint:      #C4BEB5;
+      --border:     #DDD8D0;
+      --accent:     #7B6FA0;
+      --accent-soft:#EBE8F5;
+      --green:      #82A880;
+      --font-ui:    'DM Sans', sans-serif;
+      --font-serif: 'Lora', serif;
+      --shadow:     0 8px 40px rgba(0,0,0,.12);
+    }
+    [data-theme="dark"] {
+      --bg:         #1A1814;
+      --panel:      #2A2722;
+      --text:       #E8E2D9;
+      --muted:      #8C8178;
+      --faint:      #4A4540;
+      --border:     #3A3630;
+      --accent:     #9D90C4;
+      --accent-soft:#2A2540;
+      --green:      #6B9869;
+      --shadow:     0 8px 40px rgba(0,0,0,.5);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font-ui);
+      background: var(--bg);
+      color: var(--text);
+      transition: background .25s, color .25s;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    /* Background decoration */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 20%, rgba(123,111,160,.08) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 80% 80%, rgba(130,168,128,.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 48px 44px 44px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--shadow);
+      position: relative;
+      animation: rise .3s ease;
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .brand-emoji { font-size: 32px; line-height: 1; }
+    .brand-name {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .card h1 {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+
+    .card p {
+      font-size: 14.5px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0;
+      color: var(--faint);
+      font-size: 12px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Google button ──────────────────────────── */
+    .btn-google {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 12px 20px;
+      background: #fff;
+      border: 1px solid #dadce0;
+      border-radius: 10px;
+      font-family: var(--font-ui);
+      font-size: 14.5px;
+      font-weight: 500;
+      color: #3c4043;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s, box-shadow .15s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+    .btn-google:hover {
+      background: #f8f9fa;
+      box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    }
+    [data-theme="dark"] .btn-google {
+      background: #303134;
+      border-color: #5f6368;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .btn-google:hover { background: #3c4043; }
+
+    .btn-google-logo {
+      flex-shrink: 0;
+      width: 20px; height: 20px;
+    }
+
+    .btn-google span { flex: 1; text-align: center; }
+
+    /* ── Apple button ───────────────────────────── */
+    .btn-apple {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 12px 20px;
+      background: #000;
+      border: 1px solid #000;
+      border-radius: 10px;
+      font-family: var(--font-ui);
+      font-size: 14.5px;
+      font-weight: 500;
+      color: #fff;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s;
+    }
+    .btn-apple:hover { background: #1a1a1a; }
+    [data-theme="dark"] .btn-apple {
+      background: #fff;
+      border-color: #fff;
+      color: #000;
+    }
+    [data-theme="dark"] .btn-apple:hover { background: #e8e8e8; }
+
+    .btn-apple-logo {
+      flex-shrink: 0;
+      width: 18px; height: 22px;
+      fill: currentColor;
+    }
+
+    .btn-apple span { flex: 1; text-align: center; }
+
+    /* ── Error state ────────────────────────────── */
+    .error-box {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 13.5px;
+      color: #b91c1c;
+      margin-bottom: 20px;
+    }
+    [data-theme="dark"] .error-box {
+      background: rgba(185,28,28,.12);
+      border-color: rgba(185,28,28,.3);
+      color: #fca5a5;
+    }
+    .error-box.visible { display: block; }
+
+    /* ── Footer ─────────────────────────────────── */
+    .card-footer {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--faint);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 0;
+    }
+    .loading-spinner {
+      width: 24px; height: 24px;
+      border: 2.5px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 13.5px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">
+    <span class="brand-emoji">🏡</span>
+    <span class="brand-name">Our Space</span>
+  </div>
+
+  <h1>Welcome back</h1>
+  <p>Sign in to access your shared notes and plans.</p>
+
+  <div id="error-box" class="error-box"></div>
+
+  <div id="buttons">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading…</div>
+    </div>
+  </div>
+
+  <div class="card-footer">
+    Your notes are private and self-hosted.<br>Only invited accounts can sign in.
+  </div>
+</div>
+
+<script>
+  // Apply theme from localStorage (same key as main app)
+  const theme = localStorage.getItem('our-notion-theme') ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+
+  // Show error if redirected back with ?error=
+  const params = new URLSearchParams(location.search);
+  const err = params.get('error');
+  const errorBox = document.getElementById('error-box');
+  if (err === 'denied') {
+    errorBox.textContent = 'Your account isn\'t allowed to access this space. Ask the owner to add your email.';
+    errorBox.classList.add('visible');
+  } else if (err === 'not_configured') {
+    errorBox.textContent = 'This sign-in method isn\'t configured yet. Check server setup.';
+    errorBox.classList.add('visible');
+  }
+
+  // Fetch which providers are available, then render buttons
+  fetch('/auth/config')
+    .then(r => r.json())
+    .then(({ google, apple }) => {
+      const container = document.getElementById('buttons');
+      let html = '';
+
+      if (google) {
+        html += `
+          <a href="/auth/google" class="btn-google">
+            <svg class="btn-google-logo" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              <path fill="none" d="M0 0h48v48H0z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </a>`;
+      }
+
+      if (google && apple) {
+        html += `<div class="divider">or</div>`;
+      }
+
+      if (apple) {
+        html += `
+          <a href="/auth/apple" class="btn-apple">
+            <svg class="btn-apple-logo" viewBox="0 0 814 1000">
+              <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.8-169.5-111.4c-63.5-68.6-115.6-171.4-115.6-269.5 0-159.8 104.2-244.5 206.9-244.5 77.7 0 142.3 52.6 188.1 52.6 43.9 0 115.8-56.6 202.8-56.6zM631.5 22.1c-37.4 41.8-67.9 105.6-67.9 169.4 0 7.1.7 14.2 1.3 21.3 4.5.3 9 .6 13.5.6 29 0 65.6-9.7 96.3-45.1 29-32.5 50.2-83.5 50.2-139.3 0-6.1-.6-12.9-1.3-19.4-3.9.3-7.7.6-11.6.6-26.5 0-55.7 11.3-80.5 12.9z"/>
+            </svg>
+            <span>Continue with Apple</span>
+          </a>`;
+      }
+
+      if (!google && !apple) {
+        html = `<p style="text-align:center;color:var(--muted);font-size:13.5px;padding:12px 0">
+          No sign-in providers are configured yet.<br>
+          Add <code>GOOGLE_CLIENT_ID</code> to your <code>.env</code> file.
+        </p>`;
+      }
+
+      container.innerHTML = html;
+    })
+    .catch(() => {
+      document.getElementById('buttons').innerHTML =
+        '<p style="color:var(--muted);text-align:center;font-size:13.5px">Could not connect to server.</p>';
+    });
+</script>
+</body>
+</html>

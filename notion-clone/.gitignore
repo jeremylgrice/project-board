@@ -1,0 +1,14 @@
+# Environment — contains secrets
+.env
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db

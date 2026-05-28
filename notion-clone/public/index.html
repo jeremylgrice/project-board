@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Our Space</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','ui-sans-serif','system-ui','sans-serif'] } } }
+    }
+  </script>
+
+  <!-- Component styles for JS-generated elements -->
+  <style type="text/tailwindcss">
+    @layer base {
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { @apply h-full overflow-hidden font-sans; }
+    }
+
+    @layer components {
+      /* Sidebar tree items */
+      .tree-item {
+        @apply flex items-center gap-1 rounded px-2 py-[3px] text-[13.5px] cursor-pointer select-none
+               text-[#37352f] dark:text-[rgba(255,255,255,.81)]
+               hover:bg-[rgba(55,53,47,.06)] dark:hover:bg-white/[.05] transition-colors duration-75;
+      }
+      .tree-item.active { @apply bg-[rgba(55,53,47,.08)] dark:bg-white/[.07]; }
+      .tree-item:hover .tree-actions { display: flex; }
+
+      /* Block wrapper */
+      .bw { @apply flex items-start gap-0.5 my-px relative; }
+      .bhandle {
+        @apply flex-shrink-0 w-6 pt-[3px] opacity-0 text-[#9b9a97] text-[13px] cursor-grab
+               text-center select-none transition-opacity duration-150;
+      }
+      .bw:hover > .bhandle { @apply opacity-100; }
+
+      /* Block content */
+      .bc {
+        @apply flex-1 min-w-0 outline-none bg-transparent text-[16px] leading-[1.72]
+               text-[#37352f] dark:text-[rgba(255,255,255,.81)] min-h-[28px] break-words whitespace-pre-wrap;
+        caret-color: #2383e2;
+        word-break: break-word;
+      }
+      .bc:empty::before { content: attr(data-ph); @apply text-[#c7c6c3] pointer-events-none; }
+
+      /* Block types */
+      [data-t="h1"] .bc { @apply text-[2rem] font-bold mt-6 leading-tight; font-family: Georgia, serif; }
+      [data-t="h2"] .bc { @apply text-[1.5rem] font-bold mt-5 leading-snug; font-family: Georgia, serif; }
+      [data-t="h3"] .bc { @apply text-[1.125rem] font-semibold mt-3; }
+      [data-t="bullet"]   { padding-left: calc(var(--ind,0) * 22px); }
+      [data-t="numbered"] { padding-left: calc(var(--ind,0) * 22px); }
+      [data-t="todo"]     { @apply items-start; padding-left: calc(var(--ind,0) * 22px); }
+
+      .bullet-dot { @apply flex-shrink-0 w-5 pt-[6px] text-center text-[15px] text-[#9b9a97]; }
+      .num-label  {
+        @apply flex-shrink-0 w-6 pt-1 text-[14px] text-[#9b9a97] text-right pr-1.5;
+        font-variant-numeric: tabular-nums;
+      }
+      .todo-box {
+        @apply flex-shrink-0 w-[15px] h-[15px] mt-[6px] mr-1 border border-[#d3d1cb] rounded-[3px]
+               bg-white cursor-pointer flex items-center justify-center transition-all duration-150 flex-shrink-0;
+      }
+      .todo-box:hover { @apply border-[#2383e2]; }
+      .done .todo-box { @apply bg-[#2383e2] border-[#2383e2]; }
+      .done .todo-box::after { content: '✓'; color: white; font-size: 9px; font-weight: 700; line-height: 1; }
+      .done .bc { @apply line-through text-[#9b9a97]; }
+
+      [data-t="quote"] { @apply border-l-[3px] border-[#e9e9e7] pl-4 my-0.5; }
+      [data-t="quote"] .bc { @apply italic text-[#9b9a97]; }
+      [data-t="code"] .bc {
+        @apply font-mono text-[13.5px] bg-[#f7f7f5] rounded-md px-3.5 py-2.5 text-[#eb5757] whitespace-pre overflow-x-auto;
+      }
+      [data-t="divider"] { @apply py-2.5 my-1; }
+      [data-t="divider"] .bc { @apply hidden; }
+      [data-t="divider"]::after { content: ''; @apply block w-full h-px bg-[#e9e9e7] ml-6; }
+      [data-t="callout"] .bc { @apply bg-[#eef3fc] rounded-lg px-4 py-3 border-l-4 border-[#2383e2]; }
+
+      /* Inline formatting */
+      .bc b, .bc strong { @apply font-bold; }
+      .bc i, .bc em { @apply italic; }
+      .bc u { @apply underline; }
+      .bc s { @apply line-through; }
+      .bc code { @apply font-mono text-[.88em] bg-[#f7f7f5] rounded px-1 py-px text-[#eb5757]; }
+      .bc a { @apply text-[#2383e2] underline cursor-pointer; }
+
+      /* Slash menu */
+      .sm-section { @apply text-[10.5px] font-semibold tracking-wide uppercase text-[#9b9a97] px-3 pt-2 pb-1; }
+      .sm-item {
+        @apply flex items-center gap-2.5 px-3 py-[7px] cursor-pointer text-[13.5px]
+               text-[#37352f] dark:text-[rgba(255,255,255,.81)]
+               hover:bg-[#eef3fc] dark:hover:bg-white/[.05] transition-colors duration-75;
+      }
+      .sm-item.hi { @apply bg-[#eef3fc] dark:bg-white/[.05]; }
+      .sm-icon { @apply w-7 h-7 bg-[#f7f7f5] dark:bg-white/[.07] rounded-md flex items-center justify-center text-sm flex-shrink-0; }
+      .sm-label { @apply font-medium; }
+      .sm-sub { @apply text-[11.5px] text-[#9b9a97]; }
+
+      /* Emoji picker */
+      .ep-emoji { @apply text-[22px] p-[5px] rounded-md cursor-pointer leading-none hover:bg-[#eef3fc] dark:hover:bg-white/[.06] transition-colors; }
+
+      /* Cover picker */
+      .cp-swatch { @apply h-9 rounded-md cursor-pointer border-2 border-transparent transition-transform duration-150 hover:scale-105; }
+      .cp-swatch.active { @apply border-[#37352f] dark:border-white/60; }
+      .cp-none { @apply bg-[#f7f7f5] dark:bg-white/[.04] flex items-center justify-center text-[13px] text-[#9b9a97]; border: 1.5px dashed #e9e9e7; }
+
+      /* Format toolbar buttons */
+      .ft-btn {
+        @apply w-[30px] h-7 flex items-center justify-center border-none bg-transparent rounded-[5px] text-[13px] font-semibold
+               text-[#37352f] dark:text-white/80 cursor-pointer
+               hover:bg-[rgba(55,53,47,.06)] dark:hover:bg-white/[.08] transition-colors duration-100;
+      }
+      .ft-btn.active { @apply bg-[#eef3fc] dark:bg-white/[.1] text-[#2383e2]; }
+    }
+  </style>
+
+  <style>
+    /* Dark mode overrides for dynamic elements */
+    .dark .bc:empty::before { color: rgba(255,255,255,.2); }
+    .dark .todo-box { border-color: rgba(255,255,255,.25); background: transparent; }
+    .dark .done .todo-box { background: #2383e2; border-color: #2383e2; }
+    .dark [data-t="quote"] { border-left-color: rgba(255,255,255,.13); }
+    .dark [data-t="code"] .bc { background: rgba(255,255,255,.04); }
+    .dark [data-t="callout"] .bc { background: rgba(35,131,226,.1); }
+    .dark [data-t="divider"]::after { background: rgba(255,255,255,.09); }
+    .dark .bc code { background: rgba(255,255,255,.1); }
+    .dark .sm-icon { background: rgba(255,255,255,.07); }
+    .dark .cp-none { border-color: rgba(255,255,255,.12); }
+
+    /* Tree expand/collapse */
+    .tree-chevron { transition: transform .18s; }
+    .tree-chevron.open { transform: rotate(90deg); }
+    .tree-children { display: none; }
+    .tree-children.open { display: block; }
+    .tree-actions { display: none; gap: 2px; flex-shrink: 0; }
+
+    /* Cover */
+    #page-cover { display: none; }
+    #page-cover.has-cover { display: block; }
+    #page-cover:hover .cover-actions { opacity: 1; }
+
+    /* Add cover: only show on editor hover when no cover */
+    #add-cover-btn { display: none; }
+    #editor:hover #add-cover-btn:not(.force-hide) { display: flex; }
+
+    /* Sync dot */
+    #sync-dot { background: #82A880; transition: background .3s; }
+    #sync-dot[data-state="saving"]  { background: #D09B5A; animation: blink 1s infinite; }
+    #sync-dot[data-state="offline"] { background: #c7c6c3; }
+
+    /* Format toolbar / pickers — shown via JS class toggle */
+    #format-toolbar { display: none; }
+    #format-toolbar.visible { display: flex; animation: popIn .14s ease; }
+    #ft-link-wrap { display: none; }
+    #ft-link-wrap.visible { display: flex; }
+    #slash-menu { display: none; }
+    #slash-menu.open { display: block; }
+    #emoji-picker { display: none; flex-wrap: wrap; }
+    #emoji-picker.open { display: flex; }
+    #cover-picker { display: none; }
+    #cover-picker.open { display: block; }
+
+    /* Animations */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes float  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:.3} }
+    @keyframes popIn  { from{opacity:0;transform:translateY(3px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+    #editor { animation: fadeUp .2s ease; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(55,53,47,.12); border-radius: 3px; }
+    .dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); }
+    ::selection { background: rgba(35,131,226,.18); }
+
+    /* Mobile */
+    @media (max-width: 700px) {
+      #sidebar { position: fixed; inset: 0 auto 0 0; transform: translateX(-100%); box-shadow: 4px 0 20px rgba(0,0,0,.12); transition: transform .25s cubic-bezier(.4,0,.2,1); }
+      #sidebar.open { transform: translateX(0); }
+      #menu-btn { display: flex !important; }
+      #editor { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+      #page-title { font-size: 1.75rem !important; }
+      #format-toolbar { display: none !important; }
+    }
+  </style>
+</head>
+<body class="text-[#37352f] bg-white dark:bg-[#191919] dark:text-[rgba(255,255,255,.81)]">
+
+<div id="app" class="flex h-screen overflow-hidden">
+
+  <!-- ── Sidebar ──────────────────────────────────── -->
+  <nav id="sidebar"
+    class="w-[240px] bg-[#f7f7f5] dark:bg-[#202020] border-r border-[#e9e9e7] dark:border-white/[.07]
+           flex flex-col flex-shrink-0 z-[200] overflow-hidden">
+
+    <div id="sb-header"
+      class="flex items-center gap-2 px-3 py-2.5 border-b border-[#e9e9e7] dark:border-white/[.07] flex-shrink-0">
+      <span class="text-lg flex-shrink-0 leading-none">🏡</span>
+      <input id="sb-title-input" value="Our Space" title="Workspace name"
+        class="text-[13.5px] font-semibold bg-transparent border-none outline-none flex-1 min-w-0
+               text-[#37352f] dark:text-[rgba(255,255,255,.81)]" />
+      <span id="online-badge"
+        class="text-[10.5px] px-1.5 py-[2px] rounded-full font-medium whitespace-nowrap flex-shrink-0
+               bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+        ● Live
+      </span>
+      <button id="dark-toggle" title="Toggle dark mode"
+        class="flex-shrink-0 w-6 h-6 flex items-center justify-center border-none bg-transparent cursor-pointer
+               rounded text-[13px] text-[#9b9a97] hover:bg-[rgba(55,53,47,.06)] dark:hover:bg-white/[.06]
+               transition-colors">🌙</button>
+    </div>
+
+    <div id="page-tree" class="flex-1 overflow-y-auto overflow-x-hidden py-1.5 px-1.5"></div>
+
+    <button id="sb-new-btn"
+      class="flex items-center gap-1.5 mx-2 mb-1 px-2.5 py-1.5 rounded text-[13px] text-[#9b9a97]
+             bg-transparent border-none cursor-pointer text-left
+             hover:bg-[rgba(55,53,47,.05)] dark:hover:bg-white/[.04] transition-colors">
+      <span class="text-base leading-none font-light">+</span> New page
+    </button>
+
+    <div id="sb-user"
+      class="flex items-center gap-2 px-3 py-2 border-t border-[#e9e9e7] dark:border-white/[.07] flex-shrink-0">
+      <div id="sb-user-avatar"
+        class="w-6 h-6 rounded-full bg-[#eef3fc] dark:bg-white/10 flex-shrink-0 overflow-hidden
+               flex items-center justify-center text-[11px] font-semibold text-[#2383e2]"></div>
+      <span id="sb-user-name"
+        class="flex-1 text-[12px] text-[#9b9a97] overflow-hidden text-ellipsis whitespace-nowrap">Loading…</span>
+      <a href="/auth/logout"
+        class="flex-shrink-0 text-[11px] text-[#9b9a97] hover:text-[#37352f] dark:hover:text-white/70
+               no-underline transition-colors">Sign out</a>
+    </div>
+  </nav>
+
+  <!-- ── Main ─────────────────────────────────────── -->
+  <div id="main" class="flex-1 flex flex-col overflow-hidden min-w-0">
+
+    <div id="topbar"
+      class="h-11 bg-white dark:bg-[#191919] border-b border-[#e9e9e7] dark:border-white/[.07]
+             flex items-center px-4 gap-3 flex-shrink-0">
+      <button id="menu-btn"
+        class="hidden items-center justify-center w-7 h-7 border-none bg-transparent cursor-pointer
+               text-[#9b9a97] rounded hover:bg-[rgba(55,53,47,.05)] text-base flex-shrink-0">☰</button>
+      <div id="breadcrumb"
+        class="flex-1 text-[13px] text-[#9b9a97] overflow-hidden text-ellipsis whitespace-nowrap">
+        Our Space
+      </div>
+      <div id="sync-status" class="flex items-center gap-1.5 text-[12px] text-[#9b9a97] flex-shrink-0">
+        <div id="sync-dot" class="w-[7px] h-[7px] rounded-full"></div>
+        <span id="sync-lbl">Saved</span>
+      </div>
+    </div>
+
+    <div id="editor-wrap" class="flex-1 overflow-y-auto overflow-x-hidden bg-white dark:bg-[#191919]">
+
+      <!-- Empty state -->
+      <div id="empty-state"
+        class="flex flex-col items-center justify-center h-full gap-3 text-[#9b9a97] px-5 py-10 text-center">
+        <div class="text-6xl mb-1" style="animation:float 3.5s ease-in-out infinite">✨</div>
+        <h2 class="text-[22px] font-bold text-[#37352f] dark:text-[rgba(255,255,255,.81)]"
+          style="font-family:Georgia,serif">Your shared space</h2>
+        <p class="text-[14.5px] max-w-[280px] leading-relaxed">
+          A private place for notes, plans, and everything you want to remember together.
+        </p>
+        <button id="empty-new-btn"
+          class="mt-2 px-5 py-2.5 bg-[#2383e2] hover:bg-[#1a6fc4] text-white text-[14px] font-medium
+                 rounded-md border-none cursor-pointer transition-colors"
+          style="box-shadow:0 1px 4px rgba(35,131,226,.35)">
+          + Create first page
+        </button>
+      </div>
+
+      <!-- Page editor -->
+      <div id="editor" class="hidden max-w-[720px] mx-auto px-[52px] pt-10 pb-[120px]">
+
+        <!-- Cover (hidden until set) -->
+        <div id="page-cover" class="-mx-[52px] -mt-10 h-[190px] relative overflow-hidden">
+          <div id="cover-bg" class="w-full h-full"></div>
+          <div class="cover-actions absolute bottom-2.5 right-3.5 flex gap-1.5 opacity-0 transition-opacity duration-150">
+            <button id="change-cover-btn"
+              class="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-white text-[12px] rounded-md
+                     border-none cursor-pointer transition-colors" style="backdrop-filter:blur(4px)">
+              Change cover
+            </button>
+            <button id="remove-cover-btn"
+              class="px-3 py-1.5 bg-black/40 hover:bg-black/60 text-white text-[12px] rounded-md
+                     border-none cursor-pointer transition-colors" style="backdrop-filter:blur(4px)">
+              Remove
+            </button>
+          </div>
+        </div>
+
+        <!-- Accent bar (shown when no cover) -->
+        <div id="page-accent-bar"
+          class="-mx-[52px] -mt-10 h-[3px] mb-9 opacity-50 bg-gradient-to-r from-[#2383e2] to-[#74b3f5]"></div>
+
+        <!-- Add cover (appears on editor hover) -->
+        <button id="add-cover-btn"
+          class="items-center gap-1.5 text-[12px] text-[#9b9a97] hover:text-[#37352f] dark:hover:text-white/60
+                 bg-transparent border-none cursor-pointer -mt-6 mb-2 transition-colors">
+          🖼 Add cover
+        </button>
+
+        <!-- Emoji -->
+        <div id="page-emoji"
+          class="text-[52px] leading-none inline-block mb-3 cursor-pointer select-none
+                 transition-transform duration-200 hover:scale-110 hover:-rotate-3">📄</div>
+
+        <!-- Title -->
+        <textarea id="page-title" placeholder="Untitled" rows="1"
+          class="block w-full text-[40px] font-bold leading-[1.2] bg-transparent border-none outline-none
+                 resize-none overflow-hidden mb-1 text-[#37352f] dark:text-[rgba(255,255,255,.9)]
+                 placeholder-[#e3e2df] dark:placeholder-white/[.15]"
+          style="font-family:Georgia,serif;min-height:52px"></textarea>
+
+        <!-- Meta -->
+        <div id="page-meta"
+          class="text-[12.5px] text-[#9b9a97] mb-5 pb-4 border-b border-[#e9e9e7] dark:border-white/[.07]
+                 flex items-center gap-2">
+        </div>
+
+        <!-- Blocks -->
+        <div id="blocks" class="min-h-[300px]"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Format toolbar ─────────────────────────────── -->
+<div id="format-toolbar"
+  class="fixed z-[600] bg-white dark:bg-[#2f2f2f] border border-[#e9e9e7] dark:border-white/[.1]
+         rounded-lg shadow-xl items-center px-1.5 py-1 gap-0.5 whitespace-nowrap">
+  <button class="ft-btn" data-cmd="bold"          title="Bold (⌘B)"><b>B</b></button>
+  <button class="ft-btn italic" data-cmd="italic"  title="Italic (⌘I)">I</button>
+  <button class="ft-btn underline" data-cmd="underline" title="Underline (⌘U)">U</button>
+  <button class="ft-btn line-through" data-cmd="strikethrough" title="Strikethrough">S</button>
+  <div class="w-px h-4 bg-[#e9e9e7] dark:bg-white/[.1] mx-0.5 flex-shrink-0"></div>
+  <button class="ft-btn font-mono text-[11px]" data-cmd="inlinecode" title="Inline code">&lt;/&gt;</button>
+  <div class="w-px h-4 bg-[#e9e9e7] dark:bg-white/[.1] mx-0.5 flex-shrink-0"></div>
+  <button class="ft-btn" data-cmd="link" title="Link">🔗</button>
+  <div id="ft-link-wrap" class="items-center gap-1 pl-1">
+    <input id="ft-link-url" type="url" placeholder="Paste URL…"
+      class="w-48 px-2 py-1 border border-[#e9e9e7] dark:border-white/[.1] rounded text-[12.5px]
+             bg-white dark:bg-[#191919] text-[#37352f] dark:text-white/80 outline-none
+             focus:border-[#2383e2] transition-colors" />
+    <button id="ft-link-go"
+      class="px-2.5 py-1 bg-[#2383e2] hover:bg-[#1a6fc4] text-white text-[12px] rounded
+             border-none cursor-pointer transition-colors">↵</button>
+  </div>
+</div>
+
+<!-- ── Slash menu ─────────────────────────────────── -->
+<div id="slash-menu"
+  class="fixed z-[500] bg-white dark:bg-[#2f2f2f] border border-[#e9e9e7] dark:border-white/[.1]
+         rounded-xl shadow-xl min-w-[240px] max-h-[320px] overflow-y-auto py-1"></div>
+
+<!-- ── Emoji picker ───────────────────────────────── -->
+<div id="emoji-picker"
+  class="fixed z-[500] bg-white dark:bg-[#2f2f2f] border border-[#e9e9e7] dark:border-white/[.1]
+         rounded-xl shadow-xl p-2.5 w-[280px] gap-0.5"></div>
+
+<!-- ── Cover picker ───────────────────────────────── -->
+<div id="cover-picker"
+  class="fixed z-[500] bg-white dark:bg-[#2f2f2f] border border-[#e9e9e7] dark:border-white/[.1]
+         rounded-xl shadow-xl p-4 w-[308px]"></div>
+
+<!-- ── Mobile overlay ────────────────────────────── -->
+<div id="overlay" class="hidden fixed inset-0 bg-black/25 z-[199]"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+const S = {
+  pages: [], pageId: null, blocks: [],
+  clientId: null, saveTimer: null, ws: null, wsRetries: 0,
+};
+
+// ═══════════════════════════════════════════════════════
+//  WEBSOCKET
+// ═══════════════════════════════════════════════════════
+function wsConnect() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const ws = new WebSocket(`${proto}//${location.host}`);
+  S.ws = ws;
+  ws.onopen = () => { S.wsRetries = 0; setDot('saved'); };
+  ws.onmessage = ({ data }) => { try { handleMsg(JSON.parse(data)); } catch {} };
+  ws.onclose = () => {
+    setDot('offline');
+    setTimeout(wsConnect, Math.min(1000 * 2 ** S.wsRetries++, 30000));
+  };
+}
+
+function handleMsg(msg) {
+  switch (msg.type) {
+    case 'hello': S.clientId = msg.clientId; break;
+    case 'page_created':
+      if (!S.pages.find(p => p.id === msg.page.id)) { S.pages.push(msg.page); renderTree(); }
+      break;
+    case 'page_updated': {
+      const i = S.pages.findIndex(p => p.id === msg.page.id);
+      if (i >= 0) S.pages[i] = msg.page;
+      renderTree();
+      if (S.pageId === msg.page.id) {
+        el('page-title').value = msg.page.title;
+        el('page-emoji').textContent = msg.page.emoji;
+        el('breadcrumb').textContent = msg.page.title || 'Untitled';
+        renderCover(msg.page.cover);
+      }
+      break;
+    }
+    case 'page_deleted':
+      S.pages = S.pages.filter(p => p.id !== msg.id);
+      renderTree();
+      if (S.pageId === msg.id) { S.pageId = null; showEmpty(); }
+      break;
+    case 'blocks_updated':
+      if (S.pageId === msg.pageId) { S.blocks = msg.blocks; renderBlocks(); }
+      break;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  API
+// ═══════════════════════════════════════════════════════
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify({ ...body, _clientId: S.clientId });
+  const r = await fetch('/api' + path, opts);
+  return r.json();
+}
+
+async function loadPages() { S.pages = await api('GET', '/pages'); renderTree(); }
+
+async function openPage(id) {
+  S.pageId = id;
+  const blocks = await api('GET', `/pages/${id}/blocks`);
+  S.blocks = blocks;
+  const page = S.pages.find(p => p.id === id);
+  showEditor(page);
+  renderBlocks();
+  el('editor-wrap').scrollTop = 0;
+}
+
+async function newPage(parentId = null) {
+  const page = await api('POST', '/pages', { title: 'Untitled', emoji: randomEmoji(), parent_id: parentId });
+  S.pages.push(page);
+  renderTree();
+  await openPage(page.id);
+  const t = el('page-title');
+  t.focus(); t.select();
+}
+
+async function delPage(id) {
+  await api('DELETE', `/pages/${id}`);
+  S.pages = S.pages.filter(p => p.id !== id);
+  renderTree();
+  if (S.pageId === id) { S.pageId = null; showEmpty(); }
+}
+
+async function doSave() {
+  if (!S.pageId) return;
+  setDot('saving');
+  const title  = el('page-title').value || 'Untitled';
+  const emoji  = el('page-emoji').textContent;
+  const cover  = currentCover();
+  const blocks = collectBlocks();
+  await api('PUT', `/pages/${S.pageId}`, { title, emoji, cover });
+  await api('PUT', `/pages/${S.pageId}/blocks`, { blocks });
+  const i = S.pages.findIndex(p => p.id === S.pageId);
+  if (i >= 0) { S.pages[i].title = title; S.pages[i].emoji = emoji; S.pages[i].cover = cover; }
+  renderTree();
+  setDot('saved');
+}
+
+function queueSave() {
+  setDot('saving');
+  clearTimeout(S.saveTimer);
+  S.saveTimer = setTimeout(doSave, 1400);
+}
+
+// ═══════════════════════════════════════════════════════
+//  SIDEBAR / TREE
+// ═══════════════════════════════════════════════════════
+function renderTree() {
+  const tree = el('page-tree');
+  tree.innerHTML = '';
+  S.pages.filter(p => !p.parent_id).forEach(p => appendTreeItem(tree, p, 0));
+}
+
+function appendTreeItem(container, page, depth) {
+  const children = S.pages.filter(p => p.parent_id === page.id);
+  const hasKids  = children.length > 0;
+  const wrapper  = document.createElement('div');
+
+  const item = document.createElement('div');
+  item.className = 'tree-item' + (page.id === S.pageId ? ' active' : '');
+  item.dataset.id = page.id;
+  item.style.paddingLeft = (8 + depth * 16) + 'px';
+  item.innerHTML = `
+    ${hasKids
+      ? `<span class="tree-chevron flex-shrink-0 w-4 h-4 flex items-center justify-center
+                      text-[9px] text-[#9b9a97] rounded-sm cursor-pointer hover:bg-black/10" title="Expand">▶</span>`
+      : `<span class="w-4 flex-shrink-0 inline-block"></span>`}
+    <span class="text-[14px] flex-shrink-0 leading-none">${page.emoji || '📄'}</span>
+    <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">${esc(page.title || 'Untitled')}</span>
+    <div class="tree-actions">
+      <button class="px-1.5 py-0.5 border-none bg-transparent cursor-pointer text-[#9b9a97] text-[11px] rounded
+                     hover:bg-black/[.06] hover:text-[#37352f] dark:hover:bg-white/[.07] dark:hover:text-white/80
+                     transition-colors" data-act="child" title="New sub-page">+</button>
+      <button class="px-1.5 py-0.5 border-none bg-transparent cursor-pointer text-[#9b9a97] text-[11px] rounded
+                     hover:bg-black/[.06] hover:text-[#37352f] dark:hover:bg-white/[.07] dark:hover:text-white/80
+                     transition-colors" data-act="del" title="Delete">✕</button>
+    </div>`;
+
+  const childContainer = document.createElement('div');
+  childContainer.className = 'tree-children';
+
+  if (hasKids) {
+    const chevron = item.querySelector('.tree-chevron');
+    chevron.addEventListener('click', e => {
+      e.stopPropagation();
+      chevron.classList.toggle('open');
+      childContainer.classList.toggle('open');
+    });
+    children.forEach(child => appendTreeItem(childContainer, child, depth + 1));
+  }
+
+  item.addEventListener('click', e => {
+    if (e.target.closest('[data-act]') || e.target.closest('.tree-chevron')) return;
+    openPage(page.id); closeSidebar();
+  });
+  item.querySelector('[data-act="child"]').addEventListener('click', e => {
+    e.stopPropagation(); newPage(page.id); closeSidebar();
+  });
+  item.querySelector('[data-act="del"]').addEventListener('click', e => {
+    e.stopPropagation();
+    if (confirm(`Delete "${page.title || 'Untitled'}"?`)) delPage(page.id);
+  });
+
+  wrapper.appendChild(item);
+  wrapper.appendChild(childContainer);
+  container.appendChild(wrapper);
+}
+
+// ═══════════════════════════════════════════════════════
+//  EDITOR VIEW
+// ═══════════════════════════════════════════════════════
+function showEditor(page) {
+  el('empty-state').classList.add('hidden');
+  el('editor').classList.remove('hidden');
+  el('page-title').value = page?.title || 'Untitled';
+  el('page-emoji').textContent = page?.emoji || '📄';
+  el('breadcrumb').textContent = page?.title || 'Untitled';
+  const created = page ? new Date(page.created_at * 1000) : new Date();
+  const updated = page?.updated_at ? new Date(page.updated_at * 1000) : null;
+  let meta = 'Created ' + created.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+  if (updated && updated - created > 5000)
+    meta += `<span class="text-[#e9e9e7] dark:text-white/[.15] mx-1">·</span>Edited ${updated.toLocaleDateString('en-US', { month:'short', day:'numeric' })}`;
+  el('page-meta').innerHTML = meta;
+  renderCover(page?.cover);
+  resizeTitle();
+}
+
+function showEmpty() {
+  el('empty-state').classList.remove('hidden');
+  el('editor').classList.add('hidden');
+  el('breadcrumb').textContent = 'Our Space';
+}
+
+// ═══════════════════════════════════════════════════════
+//  PAGE COVER
+// ═══════════════════════════════════════════════════════
+const COVER_PRESETS = [
+  null,
+  'linear-gradient(135deg,#667eea 0%,#764ba2 100%)',
+  'linear-gradient(135deg,#f093fb 0%,#f5576c 100%)',
+  'linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)',
+  'linear-gradient(135deg,#43e97b 0%,#38f9d7 100%)',
+  'linear-gradient(135deg,#fa709a 0%,#fee140 100%)',
+  'linear-gradient(135deg,#a18cd1 0%,#fbc2eb 100%)',
+  'linear-gradient(135deg,#ffecd2 0%,#fcb69f 100%)',
+  'linear-gradient(135deg,#a1c4fd 0%,#c2e9fb 100%)',
+  'linear-gradient(120deg,#d4fc79 0%,#96e6a1 100%)',
+  'linear-gradient(120deg,#f6d365 0%,#fda085 100%)',
+  'linear-gradient(135deg,#2c3e50 0%,#3d5876 100%)',
+  'linear-gradient(135deg,#7B6FA0 0%,#b0a8d4 100%)',
+  'linear-gradient(135deg,#82A880 0%,#b5d4b3 100%)',
+  'linear-gradient(135deg,#c79050 0%,#e8c07a 100%)',
+];
+
+function renderCover(cover) {
+  const coverEl  = el('page-cover');
+  const bgEl     = el('cover-bg');
+  const barEl    = el('page-accent-bar');
+  const emojiEl  = el('page-emoji');
+  const addBtn   = el('add-cover-btn');
+
+  if (cover) {
+    coverEl.classList.add('has-cover');
+    bgEl.style.background = cover;
+    barEl.classList.add('hidden');
+    addBtn.classList.add('force-hide');
+    emojiEl.style.marginTop = '-36px';
+  } else {
+    coverEl.classList.remove('has-cover');
+    bgEl.style.background = '';
+    barEl.classList.remove('hidden');
+    addBtn.classList.remove('force-hide');
+    emojiEl.style.marginTop = '';
+  }
+}
+
+function currentCover() {
+  return el('page-cover').classList.contains('has-cover')
+    ? (el('cover-bg').style.background || null)
+    : null;
+}
+
+function openCoverPicker(anchor) {
+  const picker = el('cover-picker');
+  const rect   = anchor.getBoundingClientRect();
+  const cur    = currentCover();
+  picker.style.top  = Math.min(rect.bottom + 6, window.innerHeight - 220) + 'px';
+  picker.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 316)) + 'px';
+  picker.innerHTML = `
+    <div class="text-[11px] font-semibold tracking-wide uppercase text-[#9b9a97] mb-2.5">Cover</div>
+    <div class="grid grid-cols-5 gap-1.5">` +
+    COVER_PRESETS.map((p, i) =>
+      p === null
+        ? `<div class="cp-swatch cp-none${cur===null?' active':''}" data-i="${i}">✕</div>`
+        : `<div class="cp-swatch${p===cur?' active':''}" data-i="${i}" style="background:${p}"></div>`
+    ).join('') + `</div>`;
+  picker.querySelectorAll('.cp-swatch').forEach(sw => {
+    sw.addEventListener('click', () => { renderCover(COVER_PRESETS[+sw.dataset.i]); queueSave(); closeCoverPicker(); });
+  });
+  picker.classList.add('open');
+}
+
+function closeCoverPicker() { el('cover-picker').classList.remove('open'); }
+
+el('add-cover-btn').addEventListener('click',    () => openCoverPicker(el('add-cover-btn')));
+el('change-cover-btn').addEventListener('click', e => { e.stopPropagation(); openCoverPicker(el('change-cover-btn')); });
+el('remove-cover-btn').addEventListener('click', e => { e.stopPropagation(); renderCover(null); queueSave(); });
+
+// ═══════════════════════════════════════════════════════
+//  FORMAT TOOLBAR
+// ═══════════════════════════════════════════════════════
+let ftSavedRange = null;
+
+function showFormatToolbar(rect) {
+  const tb = el('format-toolbar');
+  el('ft-link-wrap').classList.remove('visible');
+  el('ft-link-url').value = '';
+
+  tb.querySelectorAll('.ft-btn[data-cmd]').forEach(btn => {
+    const cmd = btn.dataset.cmd;
+    if (cmd === 'inlinecode' || cmd === 'link') { btn.classList.remove('active'); return; }
+    try { btn.classList.toggle('active', document.queryCommandState(cmd)); } catch {}
+  });
+
+  tb.classList.add('visible');
+  const tbW = tb.offsetWidth || 220;
+  const tbH = tb.offsetHeight || 40;
+  let left = rect.left + rect.width / 2 - tbW / 2;
+  let top  = rect.top - tbH - 10;
+  if (top < 8) top = rect.bottom + 8;
+  if (left < 8) left = 8;
+  if (left + tbW > window.innerWidth - 8) left = window.innerWidth - tbW - 8;
+  tb.style.left = left + 'px';
+  tb.style.top  = top  + 'px';
+}
+
+function hideFormatToolbar() { el('format-toolbar').classList.remove('visible'); }
+
+document.addEventListener('selectionchange', () => {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed || !sel.toString().trim()) {
+    if (!el('ft-link-wrap').classList.contains('visible')) hideFormatToolbar();
+    return;
+  }
+  const node = sel.anchorNode;
+  if (!node) return;
+  const bc = node.nodeType === 3
+    ? node.parentElement?.closest?.('.bc')
+    : node.closest?.('.bc');
+  if (!bc) { hideFormatToolbar(); return; }
+  if (sel.rangeCount) ftSavedRange = sel.getRangeAt(0).cloneRange();
+  const rect = sel.getRangeAt(0).getBoundingClientRect();
+  if (rect.width > 0) showFormatToolbar(rect);
+});
+
+el('format-toolbar').addEventListener('mousedown', e => e.preventDefault());
+
+el('format-toolbar').querySelectorAll('.ft-btn[data-cmd]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const cmd = btn.dataset.cmd;
+    if (cmd === 'inlinecode') {
+      wrapSelectionInCode();
+    } else if (cmd === 'link') {
+      const wrap = el('ft-link-wrap');
+      wrap.classList.toggle('visible');
+      if (wrap.classList.contains('visible')) el('ft-link-url').focus();
+    } else {
+      document.execCommand(cmd, false, null);
+    }
+    queueSave();
+  });
+});
+
+el('ft-link-go').addEventListener('click', applyLink);
+el('ft-link-url').addEventListener('keydown', e => {
+  if (e.key === 'Enter') applyLink();
+  if (e.key === 'Escape') hideFormatToolbar();
+});
+
+function applyLink() {
+  const url = el('ft-link-url').value.trim();
+  if (!url) return;
+  if (ftSavedRange) { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(ftSavedRange); }
+  document.execCommand('createLink', false, url);
+  queueSave();
+  hideFormatToolbar();
+}
+
+function wrapSelectionInCode() {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const range = sel.getRangeAt(0);
+  const text  = range.toString();
+  if (!text) return;
+  range.deleteContents();
+  const code = document.createElement('code');
+  code.textContent = text;
+  range.insertNode(code);
+  sel.removeAllRanges();
+  const r = document.createRange();
+  r.selectNodeContents(code);
+  sel.addRange(r);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey) {
+    const sel = window.getSelection();
+    if (!sel?.anchorNode) return;
+    const bc = sel.anchorNode.nodeType === 3
+      ? sel.anchorNode.parentElement?.closest?.('.bc')
+      : sel.anchorNode.closest?.('.bc');
+    if (!bc) return;
+    if (e.key === 'b') { e.preventDefault(); document.execCommand('bold',      false, null); queueSave(); }
+    if (e.key === 'i') { e.preventDefault(); document.execCommand('italic',    false, null); queueSave(); }
+    if (e.key === 'u') { e.preventDefault(); document.execCommand('underline', false, null); queueSave(); }
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+//  BLOCK TYPES
+// ═══════════════════════════════════════════════════════
+const BT = [
+  { group:'Basic', type:'paragraph', icon:'¶',  label:'Text',          sub:'Plain paragraph' },
+  { group:'Basic', type:'h1',        icon:'H1', label:'Heading 1',     sub:'Large heading' },
+  { group:'Basic', type:'h2',        icon:'H2', label:'Heading 2',     sub:'Medium heading' },
+  { group:'Basic', type:'h3',        icon:'H3', label:'Heading 3',     sub:'Small heading' },
+  { group:'List',  type:'bullet',    icon:'•',  label:'Bullet list',   sub:'Unordered list' },
+  { group:'List',  type:'numbered',  icon:'1.', label:'Numbered list', sub:'Ordered list' },
+  { group:'List',  type:'todo',      icon:'☐',  label:'To-do',         sub:'Track a task' },
+  { group:'Media', type:'quote',     icon:'"',  label:'Quote',         sub:'Emphasis block' },
+  { group:'Media', type:'callout',   icon:'💡', label:'Callout',       sub:'Highlighted note' },
+  { group:'Media', type:'code',      icon:'<>', label:'Code',          sub:'Monospace block' },
+  { group:'Media', type:'divider',   icon:'—',  label:'Divider',       sub:'Horizontal rule' },
+];
+
+const PH = {
+  paragraph:"Type '/' for commands…", h1:'Heading 1', h2:'Heading 2', h3:'Heading 3',
+  bullet:'List item', numbered:'List item', todo:'To-do', quote:'Quote…',
+  callout:'Callout…', code:'Code…', divider:'',
+};
+
+// ═══════════════════════════════════════════════════════
+//  RENDER BLOCKS
+// ═══════════════════════════════════════════════════════
+function renderBlocks() {
+  const container = el('blocks');
+  container.innerHTML = '';
+  if (!S.blocks.length) S.blocks = [{ id:uid(), type:'paragraph', content:'', checked:false, indent:0 }];
+  let numCtrs = {};
+  S.blocks.forEach(b => {
+    const key = String(b.indent || 0);
+    if (b.type === 'numbered') {
+      numCtrs[key] = (numCtrs[key] || 0) + 1;
+      Object.keys(numCtrs).forEach(k => { if (+k > +key) delete numCtrs[k]; });
+    } else { delete numCtrs[key]; }
+    container.appendChild(makeBlock(b, numCtrs[key]));
+  });
+}
+
+function makeBlock(b, numIdx) {
+  const btype  = b.type || 'paragraph';
+  const bIndent = b.indent || 0;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'bw' + (b.checked ? ' done' : '');
+  wrap.dataset.id  = b.id || uid();
+  wrap.dataset.t   = btype;
+  wrap.dataset.ind = bIndent;
+  wrap.style.setProperty('--ind', bIndent);
+
+  const handle = document.createElement('div');
+  handle.className = 'bhandle';
+  handle.textContent = '⠿';
+  wrap.appendChild(handle);
+
+  if (btype === 'bullet') {
+    const dot = document.createElement('div');
+    dot.className = 'bullet-dot';
+    dot.textContent = bIndent === 0 ? '•' : bIndent === 1 ? '◦' : '▪';
+    wrap.appendChild(dot);
+  } else if (btype === 'numbered') {
+    const num = document.createElement('div');
+    num.className = 'num-label';
+    num.textContent = (numIdx || 1) + '.';
+    wrap.appendChild(num);
+  } else if (btype === 'todo') {
+    const box = document.createElement('div');
+    box.className = 'todo-box';
+    box.addEventListener('click', () => { wrap.classList.toggle('done'); queueSave(); });
+    wrap.appendChild(box);
+  }
+
+  const bc = document.createElement('div');
+  bc.className = 'bc';
+  bc.contentEditable = btype === 'divider' ? 'false' : 'true';
+  bc.dataset.ph = PH[btype] ?? '';
+  bc.innerHTML = b.content || '';
+  bc.addEventListener('input', () => { queueSave(); onSlashInput(bc); });
+  bc.addEventListener('keydown', e => onBlockKey(e, wrap));
+  wrap.appendChild(bc);
+  return wrap;
+}
+
+// ═══════════════════════════════════════════════════════
+//  KEYDOWN HANDLING
+// ═══════════════════════════════════════════════════════
+function onBlockKey(e, wrap) {
+  const bc    = wrap.querySelector('.bc');
+  const btype = wrap.dataset.t;
+
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    const listTypes = ['bullet','numbered','todo'];
+    if (listTypes.includes(btype) && !bc.textContent.trim()) {
+      const ind = +wrap.dataset.ind;
+      if (ind > 0) { wrap.dataset.ind = ind-1; wrap.style.setProperty('--ind', ind-1); queueSave(); }
+      else morphBlock(wrap, 'paragraph');
+      return;
+    }
+    const newType = btype.startsWith('h') ? 'paragraph' : btype;
+    const sel = window.getSelection();
+    const range = sel.rangeCount ? sel.getRangeAt(0) : null;
+    let afterHtml = '';
+    if (range) {
+      const after = document.createRange();
+      after.setStart(range.endContainer, range.endOffset);
+      after.setEnd(bc, bc.childNodes.length);
+      const frag = after.extractContents();
+      const tmp = document.createElement('div');
+      tmp.appendChild(frag);
+      afterHtml = tmp.innerHTML;
+      range.deleteContents();
+    }
+    insertAfter(wrap, { id:uid(), type:newType, content:afterHtml, checked:false, indent:+wrap.dataset.ind });
+    snapAndSave();
+  }
+
+  else if (e.key === 'Backspace' && !bc.textContent && !bc.innerHTML.trim()) {
+    e.preventDefault();
+    const prev = wrap.previousElementSibling;
+    removeBlock(wrap);
+    prev?.querySelector('.bc')?.focus();
+    snapAndSave();
+  }
+
+  else if (e.key === 'Tab') {
+    e.preventDefault();
+    if (['bullet','numbered','todo'].includes(btype)) {
+      const ind  = +wrap.dataset.ind;
+      const next = e.shiftKey ? Math.max(0,ind-1) : Math.min(4,ind+1);
+      wrap.dataset.ind = next;
+      wrap.style.setProperty('--ind', next);
+      queueSave();
+    }
+  }
+
+  else if (e.key === 'ArrowUp') {
+    const prev = wrap.previousElementSibling;
+    if (prev) { e.preventDefault(); prev.querySelector('.bc')?.focus(); }
+  }
+  else if (e.key === 'ArrowDown') {
+    const next = wrap.nextElementSibling;
+    if (next) { e.preventDefault(); next.querySelector('.bc')?.focus(); }
+  }
+}
+
+function insertAfter(wrap, bData) {
+  const newEl = makeBlock(bData);
+  wrap.after(newEl);
+  const bc = newEl.querySelector('.bc');
+  if (bc) {
+    bc.focus();
+    const r = document.createRange();
+    r.setStart(bc, 0); r.collapse(true);
+    const sel = window.getSelection();
+    sel.removeAllRanges(); sel.addRange(r);
+  }
+}
+
+function removeBlock(wrap) {
+  if (document.querySelectorAll('.bw').length <= 1) { wrap.querySelector('.bc').innerHTML = ''; return; }
+  wrap.remove();
+}
+
+function morphBlock(wrap, newType) {
+  const bc = wrap.querySelector('.bc');
+  wrap.dataset.t = newType;
+  wrap.querySelectorAll('.bullet-dot,.num-label,.todo-box').forEach(n => n.remove());
+  if (newType === 'todo') {
+    const box = document.createElement('div');
+    box.className = 'todo-box';
+    box.addEventListener('click', () => { wrap.classList.toggle('done'); queueSave(); });
+    wrap.insertBefore(box, bc);
+    wrap.classList.remove('done');
+  } else if (newType === 'bullet') {
+    const dot = document.createElement('div');
+    dot.className = 'bullet-dot';
+    dot.textContent = '•';
+    wrap.insertBefore(dot, bc);
+  } else if (newType === 'numbered') {
+    const num = document.createElement('div');
+    num.className = 'num-label';
+    num.textContent = '1.';
+    wrap.insertBefore(num, bc);
+  }
+  bc.dataset.ph = PH[newType] ?? '';
+  bc.contentEditable = newType === 'divider' ? 'false' : 'true';
+  queueSave();
+  bc.focus();
+}
+
+function snapAndSave() { S.blocks = collectBlocks(); renderBlocks(); queueSave(); }
+
+function collectBlocks() {
+  return Array.from(document.querySelectorAll('.bw')).map(w => ({
+    id:      w.dataset.id,
+    type:    w.dataset.t,
+    content: w.querySelector('.bc')?.innerHTML || '',
+    checked: w.classList.contains('done'),
+    indent:  +w.dataset.ind || 0,
+  }));
+}
+
+// ═══════════════════════════════════════════════════════
+//  SLASH MENU
+// ═══════════════════════════════════════════════════════
+const SM = { open:false, items:[], idx:0, wrap:null };
+
+function onSlashInput(bc) {
+  const text = bc.textContent;
+  const si = text.lastIndexOf('/');
+  if (si >= 0) {
+    const q = text.slice(si+1).toLowerCase();
+    const hits = BT.filter(b => b.label.toLowerCase().includes(q) || b.type.includes(q));
+    if (hits.length) { SM.open=true; SM.items=hits; SM.idx=0; SM.wrap=bc.closest('.bw'); positionSlashMenu(); return; }
+  }
+  closeSlashMenu();
+}
+
+function positionSlashMenu() {
+  const menu = el('slash-menu');
+  const sel  = window.getSelection();
+  let top = 100, left = 100;
+  if (sel.rangeCount) {
+    const r = sel.getRangeAt(0).getBoundingClientRect();
+    top  = r.bottom + 6;
+    left = Math.min(r.left, window.innerWidth - 250);
+  }
+  menu.style.top  = top  + 'px';
+  menu.style.left = left + 'px';
+
+  const groups = {};
+  SM.items.forEach(b => { (groups[b.group] = groups[b.group] || []).push(b); });
+  let html = '', flatIdx = 0;
+  for (const [gname, items] of Object.entries(groups)) {
+    html += `<div class="sm-section">${gname}</div>`;
+    items.forEach(b => {
+      html += `<div class="sm-item${flatIdx===SM.idx?' hi':''}" data-i="${flatIdx}">
+        <div class="sm-icon">${b.icon}</div>
+        <div><div class="sm-label">${b.label}</div><div class="sm-sub">${b.sub}</div></div>
+      </div>`;
+      flatIdx++;
+    });
+  }
+  menu.innerHTML = html;
+  menu.classList.add('open');
+  menu.querySelectorAll('.sm-item').forEach(item => item.addEventListener('click', () => applySlash(+item.dataset.i)));
+}
+
+function applySlash(idx) {
+  const b = SM.items[idx];
+  const wrap = SM.wrap;
+  if (!b || !wrap) { closeSlashMenu(); return; }
+  const bc = wrap.querySelector('.bc');
+  const text = bc.textContent;
+  const si = text.lastIndexOf('/');
+  bc.textContent = si >= 0 ? text.slice(0, si) : text;
+  const r = document.createRange();
+  r.selectNodeContents(bc); r.collapse(false);
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  morphBlock(wrap, b.type);
+  closeSlashMenu();
+}
+
+function closeSlashMenu() { SM.open=false; el('slash-menu').classList.remove('open'); }
+
+document.addEventListener('keydown', e => {
+  if (!SM.open) return;
+  if (e.key==='ArrowDown') { e.preventDefault(); SM.idx=Math.min(SM.idx+1,SM.items.length-1); positionSlashMenu(); }
+  else if (e.key==='ArrowUp')  { e.preventDefault(); SM.idx=Math.max(SM.idx-1,0); positionSlashMenu(); }
+  else if (e.key==='Enter')    { e.preventDefault(); applySlash(SM.idx); }
+  else if (e.key==='Escape')   closeSlashMenu();
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#slash-menu')) closeSlashMenu();
+  if (!e.target.closest('#emoji-picker') && !e.target.closest('#page-emoji')) closeEmojiPicker();
+  if (!e.target.closest('#cover-picker') && !e.target.closest('#add-cover-btn') && !e.target.closest('#change-cover-btn')) closeCoverPicker();
+  if (!e.target.closest('#format-toolbar') && !e.target.closest('.bc')) {
+    setTimeout(() => { if (!window.getSelection()?.toString().trim()) hideFormatToolbar(); }, 80);
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+//  EMOJI PICKER
+// ═══════════════════════════════════════════════════════
+const EMOJIS = [
+  '📄','📝','📖','📚','💡','🏠','🏡','💼','🎯','✅','🌟','🎨','🔑','📅','🎉',
+  '🌈','🌿','🍀','🦋','🐾','🎵','🎸','🎮','🍕','☕','🌙','⭐','❤️','💙','🌸',
+  '🌺','🌻','🦄','🐶','🐱','🐻','🦊','🐼','🍎','🍓','🌮','🍜','🧁','🎂','🎁',
+  '🏖️','🏔️','🌊','🔥','💎','🚀','🧩','🎭','🎬','📷','🔭','🔬','💰','🏆','🌍',
+];
+
+el('page-emoji').addEventListener('click', () => {
+  const picker = el('emoji-picker');
+  if (picker.classList.contains('open')) { closeEmojiPicker(); return; }
+  const rect = el('page-emoji').getBoundingClientRect();
+  picker.style.top  = (rect.bottom + 6) + 'px';
+  picker.style.left = Math.max(8, rect.left) + 'px';
+  picker.innerHTML  = EMOJIS.map(e => `<span class="ep-emoji">${e}</span>`).join('');
+  picker.querySelectorAll('.ep-emoji').forEach(opt => {
+    opt.addEventListener('click', () => { el('page-emoji').textContent = opt.textContent; queueSave(); closeEmojiPicker(); });
+  });
+  picker.classList.add('open');
+});
+
+function closeEmojiPicker() { el('emoji-picker').classList.remove('open'); }
+
+// ═══════════════════════════════════════════════════════
+//  PAGE TITLE
+// ═══════════════════════════════════════════════════════
+function resizeTitle() {
+  const t = el('page-title');
+  t.style.height = 'auto';
+  t.style.height = t.scrollHeight + 'px';
+}
+
+el('page-title').addEventListener('input', () => {
+  resizeTitle(); queueSave();
+  el('breadcrumb').textContent = el('page-title').value || 'Untitled';
+});
+el('page-title').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.querySelector('.bw .bc')?.focus(); }
+});
+
+// ═══════════════════════════════════════════════════════
+//  DARK MODE
+// ═══════════════════════════════════════════════════════
+function initDarkMode() {
+  const saved = localStorage.getItem('our-notion-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+}
+
+function applyTheme(theme) {
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+  el('dark-toggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('our-notion-theme', theme);
+}
+
+el('dark-toggle').addEventListener('click', () => {
+  applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+});
+
+// ═══════════════════════════════════════════════════════
+//  MOBILE SIDEBAR
+// ═══════════════════════════════════════════════════════
+el('menu-btn').addEventListener('click', () => { el('sidebar').classList.add('open'); el('overlay').classList.remove('hidden'); });
+el('overlay').addEventListener('click', closeSidebar);
+function closeSidebar() { el('sidebar').classList.remove('open'); el('overlay').classList.add('hidden'); }
+
+// ═══════════════════════════════════════════════════════
+//  SYNC DOT
+// ═══════════════════════════════════════════════════════
+function setDot(state) {
+  el('sync-dot').dataset.state = state;
+  el('sync-lbl').textContent = { saved:'Saved', saving:'Saving…', offline:'Offline' }[state] || state;
+}
+
+// ═══════════════════════════════════════════════════════
+//  WORKSPACE NAME
+// ═══════════════════════════════════════════════════════
+el('sb-title-input').addEventListener('input', () => { document.title = el('sb-title-input').value || 'Our Space'; });
+
+// ═══════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════
+function el(id)  { return document.getElementById(id); }
+function uid()   { return Math.random().toString(36).slice(2,9) + Date.now().toString(36); }
+function esc(s)  { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function randomEmoji() {
+  return ['📝','💡','📖','🎯','🌟','🎨','📚','🌿','☕','🌙','🎉','✅'][Math.floor(Math.random()*12)];
+}
+
+// ═══════════════════════════════════════════════════════
+//  BUTTONS + INIT
+// ═══════════════════════════════════════════════════════
+el('sb-new-btn').addEventListener('click', () => newPage(null));
+el('empty-new-btn').addEventListener('click', () => newPage(null));
+
+(async () => {
+  initDarkMode();
+  try {
+    const me = await fetch('/api/me').then(r => r.json());
+    const avatar = el('sb-user-avatar');
+    const name   = el('sb-user-name');
+    if (me?.photo) {
+      avatar.innerHTML = `<img src="${me.photo}" alt="" class="w-full h-full object-cover">`;
+    } else {
+      avatar.textContent = (me?.name || me?.email || '?')[0].toUpperCase();
+    }
+    name.textContent = me?.name || me?.email || 'Signed in';
+  } catch {}
+  await loadPages();
+  if (S.pages.length > 0) await openPage(S.pages[0].id);
+  wsConnect();
+})();
+</script>
+</body>
+</html>
