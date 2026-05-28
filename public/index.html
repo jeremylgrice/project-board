@@ -449,7 +449,7 @@ async function openPage(id) {
 
 async function newPage(parentId = null) {
   const page = await api('POST', '/pages', { title: 'Untitled', emoji: randomEmoji(), parent_id: parentId });
-  S.pages.push(page);
+  if (!S.pages.find(p => p.id === page.id)) S.pages.push(page);
   renderTree();
   await openPage(page.id);
   const t = el('page-title');
