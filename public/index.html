@@ -164,6 +164,14 @@
     #cover-picker { display: none; }
     #cover-picker.open { display: block; }
 
+    /* Locked mode */
+    .locked-mode .bhandle { opacity: 0 !important; pointer-events: none; }
+    .locked-mode #page-title { pointer-events: none; cursor: default; }
+    .locked-mode #page-emoji { pointer-events: none; }
+    .locked-mode #add-cover-btn { display: none !important; }
+    .locked-mode .cover-actions { display: none !important; }
+    .locked-mode .bc a { cursor: pointer; }
+
     /* Animations */
     @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
     @keyframes float  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
@@ -254,9 +262,16 @@
         <div id="sync-dot" class="w-[7px] h-[7px] rounded-full"></div>
         <span id="sync-lbl">Saved</span>
       </div>
+      <button id="edit-toggle-btn"
+        class="px-3 py-[5px] text-[12px] font-medium rounded-full cursor-pointer flex-shrink-0
+               transition-all duration-150 border border-[#e9e9e7] dark:border-white/[.1]
+               bg-transparent text-[#9b9a97] hover:border-[#37352f] hover:text-[#37352f]
+               dark:hover:border-white/40 dark:hover:text-white/70">
+        ✏️ Edit
+      </button>
     </div>
 
-    <div id="editor-wrap" class="flex-1 overflow-y-auto overflow-x-hidden bg-white dark:bg-[#191919]">
+    <div id="editor-wrap" class="flex-1 overflow-y-auto overflow-x-hidden bg-white dark:bg-[#191919] relative">
 
       <!-- Empty state -->
       <div id="empty-state"
@@ -379,6 +394,7 @@
 const S = {
   pages: [], pageId: null, blocks: [],
   clientId: null, saveTimer: null, ws: null, wsRetries: 0,
+  locked: true,
 };
 
 // ═══════════════════════════════════════════════════════
@@ -551,6 +567,15 @@ function appendTreeItem(container, page, depth) {
 // ═══════════════════════════════════════════════════════
 //  EDITOR VIEW
 // ═══════════════════════════════════════════════════════
+function applyLockState() {
+  el('editor-wrap').classList.toggle('locked-mode', S.locked);
+  el('page-title').readOnly = S.locked;
+  const btn = el('edit-toggle-btn');
+  btn.textContent = S.locked ? '✏️ Edit' : '🔒 Done editing';
+  btn.style.borderColor = S.locked ? '' : '#2383e2';
+  btn.style.color       = S.locked ? '' : '#2383e2';
+}
+
 function showEditor(page) {
   el('empty-state').classList.add('hidden');
   el('editor').classList.remove('hidden');
@@ -565,6 +590,7 @@ function showEditor(page) {
   el('page-meta').innerHTML = meta;
   renderCover(page?.cover);
   resizeTitle();
+  applyLockState();
 }
 
 function showEmpty() {
@@ -912,11 +938,19 @@ function makeBlock(b, numIdx) {
 
   const bc = document.createElement('div');
   bc.className = 'bc';
-  bc.contentEditable = btype === 'divider' ? 'false' : 'true';
+  bc.contentEditable = (btype === 'divider' || S.locked) ? 'false' : 'true';
   bc.dataset.ph = PH[btype] ?? '';
   bc.innerHTML = b.content || '';
-  bc.addEventListener('input', () => { queueSave(); onSlashInput(bc); });
-  bc.addEventListener('keydown', e => onBlockKey(e, wrap));
+  if (!S.locked) {
+    bc.addEventListener('input', () => { queueSave(); onSlashInput(bc); });
+    bc.addEventListener('keydown', e => onBlockKey(e, wrap));
+  }
+  bc.addEventListener('click', e => {
+    const a = e.target.closest('a[href]');
+    if (!a) return;
+    e.preventDefault();
+    window.open(a.href, '_blank', 'noopener');
+  });
   wrap.appendChild(bc);
   return wrap;
 }
@@ -1231,9 +1265,15 @@ function randomEmoji() {
 // ═══════════════════════════════════════════════════════
 el('sb-new-btn').addEventListener('click', () => newPage(null));
 el('empty-new-btn').addEventListener('click', () => newPage(null));
+el('edit-toggle-btn').addEventListener('click', () => {
+  S.locked = !S.locked;
+  applyLockState();
+  renderBlocks();
+});
 
 (async () => {
   initDarkMode();
+  applyLockState();
   try {
     const me = await fetch('/api/me').then(r => r.json());
     const avatar = el('sb-user-avatar');
