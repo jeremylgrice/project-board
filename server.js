@@ -185,16 +185,9 @@ app.post('/api/pages', async (req, res) => {
     const { title = 'Untitled', emoji = '📄', parent_id = null } = req.body;
     const now = Date.now();
 
-    const siblingsSnap = await db.collection('pages')
-      .where('parent_id', '==', parent_id)
-      .orderBy('position', 'desc')
-      .limit(1)
-      .get();
-    const position = siblingsSnap.empty ? 0 : siblingsSnap.docs[0].data().position + 1;
-
     const id = randomUUID();
     const page = {
-      title, emoji, cover: null, parent_id, position,
+      title, emoji, cover: null, parent_id, position: now,
       created_at: now, updated_at: now,
       blocks: [{ id: randomUUID(), type: 'paragraph', content: '', checked: false, indent: 0 }],
     };

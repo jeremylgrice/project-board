@@ -21,6 +21,94 @@ Both of you can open it from your phones and edits sync live.
 ### Requirements
 - [Node.js 18+](https://nodejs.org) installed on your computer/server
 
+### Environment variables
+
+Create a file called `.env` in the project root folder (same folder as `server.js`). Paste in the following and fill in each value:
+
+```
+SESSION_SECRET=<random long string>
+
+GOOGLE_CLIENT_ID=<from Google Cloud Console>
+GOOGLE_CLIENT_SECRET=<from Google Cloud Console>
+ALLOWED_EMAILS=you@example.com,partner@example.com
+
+FIREBASE_SERVICE_ACCOUNT=<paste service account JSON as a single line — see below>
+
+APP_URL=http://localhost:3000
+```
+
+---
+
+#### `SESSION_SECRET`
+Any long random string — used to sign login cookies. You can generate one by running this in your terminal:
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+Paste the output as the value.
+
+---
+
+#### `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
+This app uses Google sign-in. You need to register it in Google Cloud:
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com)
+2. Create a new project (or select your existing one)
+3. In the left menu go to **APIs & Services → OAuth consent screen**
+   - Choose **External**, click Create
+   - Fill in an app name (e.g. "Our Space"), your email for support and developer contact
+   - Click Save and Continue through the rest (no scopes needed, no test users needed)
+4. In the left menu go to **APIs & Services → Credentials**
+   - Click **+ Create Credentials → OAuth client ID**
+   - Application type: **Web application**
+   - Under **Authorised redirect URIs**, add: `http://localhost:3000/auth/google/callback`
+   - Click Create
+5. Copy the **Client ID** → paste as `GOOGLE_CLIENT_ID`
+6. Copy the **Client Secret** → paste as `GOOGLE_CLIENT_SECRET`
+
+---
+
+#### `ALLOWED_EMAILS`
+A comma-separated list of Google account email addresses that are allowed to log in. Anyone not on this list will be blocked even if they sign in with Google successfully. Example:
+```
+ALLOWED_EMAILS=you@gmail.com,partner@gmail.com
+```
+
+---
+
+#### `FIREBASE_SERVICE_ACCOUNT`
+The app stores all data in Firebase Firestore. You need a service account key to give the server permission to read/write it.
+
+1. Go to [console.firebase.google.com](https://console.firebase.google.com)
+2. Select your project (create one if needed)
+3. In the left menu go to **Project Settings** (gear icon) → **Service accounts** tab
+4. Click **Generate new private key** → **Generate key**
+5. A JSON file will download to your computer — open it in a text editor
+6. Select all the text and copy it
+7. Paste it as the value of `FIREBASE_SERVICE_ACCOUNT` — it must be on a **single line with no line breaks**
+
+   If you paste it and it ends up on multiple lines, you can collapse it to one line by running:
+   ```bash
+   cat your-downloaded-file.json | tr -d '\n'
+   ```
+   Then paste that output as the value.
+
+Also make sure Firestore is enabled in your Firebase project:
+- In the Firebase Console left menu go to **Build → Firestore Database**
+- Click **Create database**, choose **Start in production mode**, pick a region, click Enable
+
+---
+
+#### `APP_URL`
+The base URL the server is running at. For local development this is always:
+```
+APP_URL=http://localhost:3000
+```
+If you deploy to a server with a domain, change it to that (e.g. `https://ourspace.example.com`). This is used for the Google OAuth callback URL.
+
+---
+
+**To add a new env key in the future:** add `KEY=value` on a new line in `.env`, grouped with related keys or at the bottom. Then restart the server.
+
 ### Steps
 
 ```bash
@@ -52,31 +140,38 @@ You'll see output like:
 
 ---
 
-## 🌐 Hosting on the internet (optional)
+## 🌐 Hosting
 
-If you want to access it from anywhere (not just home Wi-Fi), you have a few options:
+This app is hosted on **Railway** at [railway.app](https://railway.app).
 
-### Option A: Tailscale (easiest, free)
-1. Install [Tailscale](https://tailscale.com) on the server computer and both phones
-2. Use your Tailscale IP instead of the local IP
+### Deploying / redeploying to Railway
 
-### Option B: VPS (always online)
-Deploy to a cheap VPS (DigitalOcean, Hetzner, etc.):
-```bash
-# On the server
-PORT=3000 node server.js
+1. Push your changes to the `main` branch on GitHub — Railway auto-deploys on push
+2. Or trigger a manual deploy from the Railway dashboard
 
-# Use nginx or Caddy as a reverse proxy with HTTPS
-```
+### Environment variables on Railway
 
-### Option C: Fly.io / Railway (simple cloud deploy)
-Both support Node.js with persistent volumes for the SQLite file.
+Railway has its own env var store — the `.env` file is **not** uploaded. You need to set each variable in the Railway dashboard:
+
+1. Open your project on [railway.app](https://railway.app)
+2. Click your service → **Variables** tab
+3. Add each key from your `.env` file one by one (`SESSION_SECRET`, `GOOGLE_CLIENT_ID`, etc.)
+4. Make sure `APP_URL` is set to your Railway public URL (e.g. `https://your-app.up.railway.app`)
+5. Railway restarts the service automatically after saving
+
+### Google OAuth callback URL
+
+When running on Railway (not localhost), you need to add your Railway URL as an authorised redirect URI in Google Cloud:
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) → APIs & Services → Credentials
+2. Click your OAuth client
+3. Under **Authorised redirect URIs** add: `https://your-app.up.railway.app/auth/google/callback`
+4. Click Save
 
 ---
 
 ## 📁 Data
-All notes are stored in `data.db` (SQLite) in the project folder.
-Back it up occasionally — it's just a single file.
+All notes are stored in **Firebase Firestore** (cloud). Data is tied to your Firebase project — no local database file to back up.
 
 ---
 
